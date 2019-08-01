@@ -1,5 +1,6 @@
 #include "clients.h"
 
+#include <stdio.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -10,9 +11,10 @@ static void add_client(struct client* client) {
 }
 
 int accept_clients(int socket) {
+    // TODO: guard agains malicious clients that keep sending connections
     while (1) {
         int client_fd = accept(socket, NULL, NULL);
-		if (client_fd == EAGAIN && client_fd == EWOULDBLOCK) {
+		if (errno == EAGAIN || errno == EWOULDBLOCK) {
             // No more connections
             return 0;
         } else if (client_fd >= 0) {

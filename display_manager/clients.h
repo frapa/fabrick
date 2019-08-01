@@ -1,5 +1,9 @@
+// Helper functions to work with clients
+// and manage client data like attributes and such.
+
 #ifndef DM_CLIENTS
 #define DM_CLIENTS
+
 
 #include "ut/uthash.h"
 
@@ -14,7 +18,7 @@ struct client {
 // Client hash table
 static struct client* clients = NULL;
 
-// accept new client connections and adds them to the client hash map
+// Accepts new client connections and adds them to the client hash map
 int accept_clients(int socket);
 
 #endif

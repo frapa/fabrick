@@ -10,7 +10,9 @@
         "pthread.h": "c",
         "stdio.h": "c",
         "poll.h": "c",
-        "un.h": "c"
+        "un.h": "c",
+        "server.h": "c",
+        "errno.h": "c"
     },
     "spellright.language": [],
     "spellright.documentTypes": [

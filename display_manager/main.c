@@ -6,9 +6,9 @@
 #include "dumbo/outconf.h"
 #include "dumbo/dumbo.h"
 #include "sock/server.h"
-#include "protocol/protocol.h"
 
 #include "./clients.h"
+#include "./procreq.h"
 
 // int random = -2;
 // uint64_t uuid() {
@@ -37,19 +37,6 @@
 // 	HASH_FIND(hh, clients, &client_id, sizeof(uint64_t), client);
 // 	return client;
 // } 
-
-void send_response_handle_error(int client_fd, uint8_t status, void* body, size_t body_size) {
-	int err = send_response(client_fd, status, body, body_size);
-	if (err < 0) fprintf(stderr, "Error sending response to client (%d): %m\n", errno);
-}
-
-void bad_request(int client_fd) {
-	send_response_handle_error(client_fd, RES_BAD_REQUEST, NULL, 0);
-}
-
-void server_error(int client_fd) {
-	send_response_handle_error(client_fd, RES_SERVER_ERROR, NULL, 0);
-}
 
 int main() {
 	int err;
@@ -95,17 +82,12 @@ int main() {
 			fprintf(stderr, "Error: Cannot accept client connection, %s.\n",
 				strerror(errno));
 		}
-	// 	struct request req;
-	// 	err = next_request(socket, &req);
-	// 	if (err < 0) {
-	// 		fprintf(stderr, "Error while reading request (%d): %m\n", errno);
-	// 		server_error(&req);
-	// 		continue;
-	// 	}
-	// 	if (err > 0) {
-	// 		bad_request(&req);
-	// 		continue;
-	// 	}
+
+		// Iterate all clients
+		struct client* client;
+		for (client = clients; client != NULL; client = client->hh.next) {
+			process_client_requests(client);
+		}
 
 	// 	printf("%d %ld %p\n", req.header.type, req.header.size, &req.body);
 
