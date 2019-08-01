@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include "sock_helper.h"
+#include "sock/helper.h"
 
 int connect_to_named_socket(char* socket_name) {
     // STEP 1: Create socket descriptor
@@ -45,7 +45,7 @@ int connect_to_file_socket(char* socket_path) {
 
     // STEP 3: Connect to the socket created by the server
     int err = connect(fd, (struct sockaddr *) &addr, sizeof(addr));
-    if (err < 0) return -1;
+    if (err < 0) return err;
 
     return fd;
 }
@@ -88,7 +88,7 @@ int _get_response(int fd, struct response* response) {
         if (count < 0) {
             // Clean-up allocation
             free(response->body);
-            return count;
+            return 1;
         }
 
         if (count != response->header.size) {

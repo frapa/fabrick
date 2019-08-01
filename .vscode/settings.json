@@ -1,0 +1,20 @@
+{
+    "files.associations": {
+        "inet.h": "c",
+        "sock_server.h": "c",
+        "socket.h": "c",
+        "sock_client.h": "c",
+        "client.h": "c",
+        "types.h": "c",
+        "uthash.h": "c",
+        "pthread.h": "c",
+        "stdio.h": "c",
+        "poll.h": "c",
+        "un.h": "c"
+    },
+    "spellright.language": [],
+    "spellright.documentTypes": [
+        "latex",
+        "plaintext"
+    ]
+}

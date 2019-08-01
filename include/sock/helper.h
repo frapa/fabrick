@@ -11,23 +11,18 @@ struct req_header {
 };
 
 struct request {
-    // public
     struct req_header header;
     void* body;
-    // private
-    int client_fd;
 };
 
 struct res_header {
-    uint8_t status;
+    uint8_t type;
     size_t size;
 };
 
 struct response {
-    // public
     struct res_header header;
     void* body;
-    // private
 };
 
 void set_sockaddr_name(struct sockaddr_un* addr, char* socket_name) {

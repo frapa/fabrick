@@ -11,7 +11,7 @@
 
 #include <xf86drm.h>
 #include <xf86drmMode.h>
-#include "dumbo.h"
+#include "dumbo/dumbo.h"
 
 /*
  * Stores the configuration for the output of a buffer

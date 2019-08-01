@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include "sock_helper.h"
+#include "sock/helper.h"
 
 // Limited by /proc/sys/net/core/somaxconn
 #define MAX_CONNECTIONS 128
@@ -16,7 +16,7 @@ int listen_to_named_socket(char* socket_name) {
     // STEP 1: Create socket descriptor
     int fd = socket(
         AF_LOCAL,      // local socket (fastest variant)
-        SOCK_STREAM,  // reliable, bidirectional
+        SOCK_STREAM | SOCK_NONBLOCK,  // reliable, bidirectional
         0             // system picks protocol
     );
 
@@ -44,7 +44,7 @@ int listen_to_file_socket(char* socket_path) {
     // STEP 1: Create socket descriptor
     int fd = socket(
         AF_LOCAL,      // local socket (fastest variant)
-        SOCK_STREAM,  // reliable, bidirectional
+        SOCK_STREAM | SOCK_NONBLOCK,  // reliable, bidirectional
         0             // system picks protocol
     );
 
@@ -66,14 +66,8 @@ int listen_to_file_socket(char* socket_path) {
     return fd;
 }
 
-int next_request(int fd, struct request* request) {
+int next_request(int client_fd, struct request* request) {
     ssize_t count;
-
-    // The call to accept blocks until a request is made
-    int client_fd = accept(fd, NULL, NULL);
-    if (client_fd < 0) return client_fd;
-
-    request->client_fd = client_fd;
 
     // First read header which contains the request size
     // and is always in a fixed format
@@ -88,7 +82,7 @@ int next_request(int fd, struct request* request) {
         if (count < 0) {
             // Clean-up allocation
             free(request->body);
-            return count;
+            return 1;
         }
 
         if (count != request->header.size) {
@@ -106,20 +100,20 @@ int next_request(int fd, struct request* request) {
     return 0;
 }
 
-int send_response(struct request* request, uint8_t status, void* body, size_t body_size) {
+int send_response(int client_fd, uint8_t status, void* body, size_t body_size) {
     int err;
 
     struct res_header header;
-    header.status = status;
+    header.type = status;
     header.size = body_size;
     
-    err = write(request->client_fd, &header, sizeof(header));
+    err = write(client_fd, &header, sizeof(header));
     if (err < 0) {
         return err;
     }
 
     if (body) {
-        err = write(request->client_fd, body, body_size);
+        err = write(client_fd, body, body_size);
         if (err < 0) {
             return err;
         }
@@ -131,9 +125,6 @@ int send_response(struct request* request, uint8_t status, void* body, size_t bo
 int close_request(struct request* request) {
     // Clean-up allocation
     free(request->body);
-
-    // End connection
-    return close(request->client_fd);
 }
 
 #endif
