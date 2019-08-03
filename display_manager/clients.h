@@ -21,4 +21,6 @@ static struct client* clients = NULL;
 // Accepts new client connections and adds them to the client hash map
 int accept_clients(int socket);
 
+
+
 #endif
