@@ -100,11 +100,11 @@ int next_request(int client_fd, struct request* request) {
     return 0;
 }
 
-int send_response(int client_fd, uint8_t status, void* body, size_t body_size) {
+int send_response(int client_fd, uint8_t type, void* body, size_t body_size) {
     int err;
 
     struct res_header header;
-    header.type = status;
+    header.type = type;
     header.size = body_size;
     
     err = write(client_fd, &header, sizeof(header));

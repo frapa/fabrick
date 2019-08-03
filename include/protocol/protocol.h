@@ -7,7 +7,7 @@
 
 #define RES_BAD_REQUEST  1
 #define RES_SERVER_ERROR 2
-#define RES_REGISTER 3
+#define RES_CREATE_BUFFER 3
 
 struct req_create_buffer {
     uint16_t width;
@@ -17,7 +17,7 @@ struct req_create_buffer {
 
 struct res_create_buffer {
     uint32_t buffer_name;
-    
+    uint32_t size;
 };
 
 #endif

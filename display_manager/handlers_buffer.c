@@ -6,8 +6,9 @@
 #include <sys/stat.h>
 #include <sys/random.h>
 #include <fcntl.h>
-
-static uint16_t buf_count = 0;
+#include "shbuf.h"
+#include "sock/server.h"
+#include "protocol/protocol.h"
 
 static void generate_new_buf_name(char* buf_name) {
     buf_name[0] = '/';
@@ -22,7 +23,9 @@ int handler_create_buffer(struct client* client, struct req_create_buffer* req) 
     if (req->width > 3840) return 1;
     if (req->height > 2160) return 1;
     
-    // Generate next_buf_name
+    // Generate buf_name randomly, due to security
+    // reasons. In this way it's not possible to guess
+    // the names of the buffers of other clients.
     char buf_name[18];
     generate_new_buf_name(buf_name);
 
@@ -43,13 +46,32 @@ int handler_create_buffer(struct client* client, struct req_create_buffer* req) 
     }
 
     // Map file so that we have a pointer to the buffer
-    uint8_t* buf = mmap(
+    uint8_t* buf_p = mmap(
         NULL, size, 
         PROT_READ, // The server only needs to read the buffer
         MAP_SHARED,
         fd, 0
     );
-    if (*buf < 0) return *buf;
+    if (*buf_p < 0) return *buf_p;
 
+    struct shbuf buf = {
+        .fd = fd,
+        .width = req->width,
+        .height = req->height,
+        .alpha = req->alpha,
+        .size = size,
+        .p = buf_p,
+    };
+    memcpy(buf.file_name, buf_name, 18);
     
+    // Update client with the new buffer information
+    client->buffers[client->buf_num++] = buf;
+
+    // Prepare and send response
+    struct res_create_buffer res = {
+        .buffer_name = buf_name,
+        .size = size,
+    };
+    send_response(client->fd, RES_CREATE_BUFFER,
+        &res, sizeof(res));
 }
