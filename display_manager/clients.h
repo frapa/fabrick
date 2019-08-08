@@ -10,16 +10,15 @@
 struct client {
 	UT_hash_handle hh;
     int fd;
-	// uint64_t id;
-	// char client_name[32];
-	uint8_t buf_num;
-	struct shbuf buffers[16];
+	struct shbuf* buffers;
 };
 
 // Client hash table
-static struct client* clients = NULL;
+extern struct client* clients;
 
 // Accepts new client connections and adds them to the client hash map
-int accept_clients(int socket);
+int add_client(int socket);
+
+int remove_client(struct client* client);
 
 #endif

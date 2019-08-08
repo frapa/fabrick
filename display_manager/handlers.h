@@ -11,5 +11,8 @@
 #include "protocol/protocol.h"
 
 int handler_create_buffer(struct client* client, struct req_create_buffer* req);
+int handler_destroy_buffer(struct client* client, struct req_destroy_buffer* req);
+int handler_update_buffer(struct client* client, struct req_update_buffer* req);
+int handler_commit_buffer(struct client* client, struct req_commit_buffer* req);
 
 #endif

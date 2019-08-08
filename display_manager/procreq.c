@@ -2,7 +2,9 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <poll.h>
 #include "handlers.h"
+#include "sock/server.h"
 
 static void send_response_handle_error(int fd, uint8_t status, void* body, size_t body_size) {
 	int err = send_response(fd, status, body, body_size);
@@ -29,6 +31,21 @@ static void proxy_to_handler(struct client* client, struct request* req) {
                 (struct req_create_buffer*)req->body);
             break;
 
+        case REQ_DESTROY_BUFFER:
+            err = handler_destroy_buffer(client,
+                (struct req_destroy_buffer*)req->body);
+            break;
+
+        case REQ_UPDATE_BUFFER:
+            err = handler_update_buffer(client,
+                (struct req_update_buffer*)req->body);
+            break;
+
+        case REQ_COMMIT_BUFFER:
+            err = handler_commit_buffer(client,
+                (struct req_commit_buffer*)req->body);
+            break;
+
         default:
             // The client sent an unsupported operation
             bad_request(client->fd);
@@ -41,32 +58,29 @@ static void proxy_to_handler(struct client* client, struct request* req) {
 void process_client_requests(struct client* client) {
     int err;
 
-    // TODO: guard agains malicious clients that keep sending messages
-    while (1) {
-        struct request req;
-        err = next_request(client->fd, &req);
-        // TODO: what happens if a client closes the connection (e.g. is closed)?
-		if (err < 0) {
-            // This error code means that we got some system error
-            // such as invalid socket.
-			fprintf(stderr, "Error: cannot read request, %s\n",
-                strerror(errno));
-			server_error(client->fd);
-			continue;
-		}
-		if (err > 0) {
-            // This error code means that there was a problem
-            // reading the request, for instance bad formatting,
-            // wrong length.
-			bad_request(client->fd);
-			continue;
-		}
-
-        // At this point we are sure the request is valid and was
-        // correctly read. We can now pass the request to the correct
-        // handler function.
-        proxy_to_handler(client, &req);
-
-        close_request(&req);
+    struct request req;
+    err = next_request(client->fd, &req);
+    // TODO: what happens if a client closes the connection (e.g. is closed)?
+    if (err < 0) {
+        // This error code means that we got some system error
+        // such as invalid socket.
+        fprintf(stderr, "Error: cannot read request, %s\n",
+            strerror(errno));
+        server_error(client->fd);
+        return;
     }
+    if (err > 0) {
+        // This error code means that there was a problem
+        // reading the request, for instance bad formatting,
+        // wrong length.
+        bad_request(client->fd);
+        return;
+    }
+
+    // At this point we are sure the request is valid and was
+    // correctly read. We can now pass the request to the correct
+    // handler function.
+    proxy_to_handler(client, &req);
+
+    close_request(&req);
 }

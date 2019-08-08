@@ -12,7 +12,18 @@
         "poll.h": "c",
         "un.h": "c",
         "server.h": "c",
-        "errno.h": "c"
+        "errno.h": "c",
+        "unistd.h": "c",
+        "handlers.h": "c",
+        "clients.h": "c",
+        "protocol.h": "c",
+        "stdlib.h": "c",
+        "dumbo.h": "c",
+        "xf86drm.h": "c",
+        "string.h": "c",
+        "xf86drmmode.h": "c",
+        "fb.h": "c",
+        "fcntl.h": "c"
     },
     "spellright.language": [],
     "spellright.documentTypes": [
