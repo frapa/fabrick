@@ -22,6 +22,17 @@ do
 done
 ar rcs include/dumbo.a include/dumbo/*.o
 
+# Protosock
+for src in include/protosock/*.c;
+do
+    $CC -c $src -o ${src%.c}.o \
+        -Iinclude \
+        -Iinclude/protosock \
+        -fPIC \
+        -std=c99
+done
+ar rcs include/protosock.a include/protosock/*.o
+
 # Display manager
 for src in display_manager/*.c;
 do
@@ -35,11 +46,14 @@ do
 done
 ar rcs display_manager.a display_manager/*.o
 
-# Display manager
+# UI Kit
 for src in uik/*.c;
 do
     $CC -c $src -o ${src%.c}.o \
         -Iinclude \
+        -Ilibs \
+        -Ilibs/cairo/include \
+        libs/cairo/bin/libcairo.a \
         -fPIC \
         -std=c99
 done
@@ -63,7 +77,10 @@ $CC -o dmgr compositor/*.c \
 
 # Client
 $CC -o dmclient dmclient.c \
-    -I./include \
+    -Ilibs \
+    -Iinclude \
+    ./uik.a \
+    ./include/protosock.a \
     ./include/sock.a \
     -static \
     -fPIC \

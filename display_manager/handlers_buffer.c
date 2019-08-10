@@ -19,15 +19,15 @@ char char_table[VALID_CHAR_NUM] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHI
 
 static void generate_new_buf_name(char* buf_name) {
     // Get some random noise
-    uint8_t noise[BUF_NAME_LENGTH];
-    getrandom(noise, BUF_NAME_LENGTH, 0);
+    uint8_t noise[BUF_NAME_LENGTH - 2];
+    getrandom(noise, BUF_NAME_LENGTH - 2, 0);
 
     // Fill buffer indexing with the noise the char_table
     buf_name[0] = '/';
-    for (int i = 0; i < BUF_NAME_LENGTH; ++i) {
+    for (int i = 0; i < BUF_NAME_LENGTH-2; ++i) {
         buf_name[i+1] = char_table[noise[i] % VALID_CHAR_NUM];
     }
-    buf_name[BUF_NAME_LENGTH + 1] = 0;
+    buf_name[BUF_NAME_LENGTH - 1] = 0;
 }
 
 int handler_create_buffer(struct client* client, struct req_create_buffer* req) {
@@ -40,7 +40,7 @@ int handler_create_buffer(struct client* client, struct req_create_buffer* req) 
     // Generate buf_name randomly, due to security
     // reasons. In this way it's not possible to guess
     // the names of the buffers of other clients.
-    char buf_name[BUF_NAME_LENGTH + 2];
+    char buf_name[BUF_NAME_LENGTH];
     generate_new_buf_name(buf_name);
 
     // Create virtual file
@@ -75,7 +75,7 @@ int handler_create_buffer(struct client* client, struct req_create_buffer* req) 
     buf->size = size;
     buf->p = buf_p;
     buf->p_committed = malloc(size);
-    memcpy(buf->file_name, buf_name, BUF_NAME_LENGTH + 2);
+    memcpy(buf->file_name, buf_name, BUF_NAME_LENGTH);
     
     // Update client with the new buffer information
     HASH_ADD_STR(client->buffers, file_name, buf);
@@ -84,7 +84,7 @@ int handler_create_buffer(struct client* client, struct req_create_buffer* req) 
     struct res_create_buffer res = {
         .size = size,
     };
-    memcpy(res.buffer_name, buf_name, BUF_NAME_LENGTH + 2);
+    memcpy(res.buffer_name, buf_name, BUF_NAME_LENGTH);
     send_response(client->fd, RES_CREATE_BUFFER,
                   &res, sizeof(res));
 

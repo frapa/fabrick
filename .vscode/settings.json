@@ -23,7 +23,11 @@
         "string.h": "c",
         "xf86drmmode.h": "c",
         "fb.h": "c",
-        "fcntl.h": "c"
+        "fcntl.h": "c",
+        "stat.h": "c",
+        "mman.h": "c",
+        "typeinfo": "c",
+        "uik.h": "c"
     },
     "spellright.language": [],
     "spellright.documentTypes": [
