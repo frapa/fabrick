@@ -7,15 +7,15 @@
 #include "protosock/protosock.h"
 
 static void _process_window_todo(int fd) {
-    struct _uik_window_todo_item* item;
-    struct _uik_window_todo_item* tmp;
+    struct _uik_win_todo_item* item;
+    struct _uik_win_todo_item* tmp;
 
     HASH_ITER(hh, _uik_window_todo_list, item, tmp) {
-        struct uik_window* win;
+        struct uik_win* win;
         uik_get_obj(item->win_id, (void**)&win);
 
         switch (item->type) {
-            case _UIK_WIN_TODO_CREATE_WINDOW:
+            case CREATE_WINDOW:
                 win->_size = create_buffer(
                     fd, 
                     win->width, win->height,
